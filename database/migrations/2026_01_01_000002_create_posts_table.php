@@ -1,0 +1,20 @@
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('posts', function (Blueprint $t) {
+            $t->id();
+            $t->string('titulo');
+            $t->string('slug')->unique();
+            $t->string('categoria')->nullable();
+            $t->string('resumo')->nullable();
+            $t->longText('conteudo')->nullable();
+            $t->string('capa')->nullable();
+            $t->boolean('publicado')->default(true);
+            $t->timestamps();
+        });
+    }
+    public function down(): void { Schema::dropIfExists('posts'); }
+};

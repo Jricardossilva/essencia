@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: essencia_app
+    ports:
+      - "8080:80"               # site: http://localhost:8080
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/vendor    # mantém o vendor instalado na imagem (boot rápido)
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks: [ essencia ]
+
+  db:
+    image: mysql:8.0
+    container_name: essencia_db
+    environment:
+      MYSQL_DATABASE: essencia
+      MYSQL_USER: essencia
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"             # 3307 no host p/ NÃO conflitar com seu MySQL local
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks: [ essencia ]
+
+volumes:
+  dbdata:
+
+networks:
+  essencia:
+    driver: bridge
