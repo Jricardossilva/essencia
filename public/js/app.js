@@ -1,4 +1,5 @@
 /* ===================== Essência — JS do site ===================== */
+/* build: menu-accordion-v4  (links livres p/ navegar) */
 const WHATS = window.ESSENCIA?.whatsapp || "5583988874271";
 const CSRF  = document.querySelector('meta[name="csrf-token"]')?.content || "";
 function waLink(m){ return "https://wa.me/"+WHATS+"?text="+encodeURIComponent(m); }
@@ -9,7 +10,32 @@ document.addEventListener('click', e=>{
 });
 
 /* menu mobile */
-document.getElementById('burger')?.addEventListener('click',()=>document.getElementById('menu').classList.toggle('open'));
+(function(){
+  const menu = document.getElementById('menu');
+  const burger = document.getElementById('burger');
+  if(!menu) return;
+  const closeSubs = ()=> menu.querySelectorAll('li.sub-open').forEach(li=>li.classList.remove('sub-open'));
+
+  burger?.addEventListener('click', ()=>{
+    const open = menu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if(!open) closeSubs();
+  });
+
+  // um único listener (delegação): só controla o acordeão; os links navegam sozinhos
+  menu.addEventListener('click', e=>{
+    // links de verdade: não interferir, deixar navegar normalmente
+    if(e.target.closest('a[href]')) return;
+    // acordeão só quando o menu mobile está aberto
+    if(!menu.classList.contains('open')) return;
+    const li = e.target.closest('li');
+    if(!li || !menu.contains(li) || !li.querySelector('.dropdown')) return;
+    e.preventDefault();
+    const willOpen = !li.classList.contains('sub-open');
+    closeSubs();
+    if(willOpen) li.classList.add('sub-open');
+  });
+})();
 
 /* WhatsApp flutuante */
 document.getElementById('waToggle')?.addEventListener('click',()=>document.getElementById('waPanel').classList.toggle('open'));

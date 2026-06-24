@@ -7,7 +7,12 @@ use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
-    private array $campos = ['capa','imagem_principal','imagem_secundaria'];
+    /** campo => [largura máx, altura máx] da imagem tratada */
+    private array $specs = [
+        'capa'              => [1200, 675],
+        'imagem_principal'  => [1600, 900],
+        'imagem_secundaria' => [1200, 900],
+    ];
 
     public function index() { return view('admin.posts.index', ['posts' => Post::latest()->get()]); }
     public function create() { return view('admin.posts.form', ['post' => new Post()]); }
@@ -30,39 +35,64 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        foreach ($this->campos as $c) if ($post->$c) Storage::disk('public')->delete($post->$c);
+        foreach (array_keys($this->specs) as $c) {
+            if ($post->$c) Storage::disk('public')->delete('posts/'.$post->$c);
+        }
         $post->delete();
         return back()->with('ok', 'Artigo removido.');
     }
 
+    /** Recebe o recorte (base64 do Croppie), trata com GD e grava só o NOME no banco. */
     private function handleImages(Request $req, Post $post): void
     {
         $dirty = [];
-        foreach ($this->campos as $campo) {
-            // remover imagem marcada
+        foreach ($this->specs as $campo => [$w, $h]) {
             if ($req->boolean('remover_'.$campo) && $post->$campo) {
-                Storage::disk('public')->delete($post->$campo);
+                Storage::disk('public')->delete('posts/'.$post->$campo);
                 $dirty[$campo] = null;
             }
-            // novo upload
-            if ($req->hasFile($campo)) {
-                if ($post->$campo) Storage::disk('public')->delete($post->$campo);
-                $dirty[$campo] = $req->file($campo)->store('posts', 'public');
+            $data = (string) $req->input($campo.'_data');
+            if (str_starts_with($data, 'data:image')) {
+                if ($post->$campo) Storage::disk('public')->delete('posts/'.$post->$campo);
+                $dirty[$campo] = $this->salvarImagem($data, $w, $h);
             }
         }
         if ($dirty) $post->update($dirty);
     }
 
+    /** Decodifica o base64, redimensiona/comprime (GD) e salva em storage/app/public/posts. Retorna o nome do arquivo. */
+    private function salvarImagem(string $base64, int $maxW, int $maxH): string
+    {
+        $raw  = base64_decode(substr($base64, strpos($base64, ',') + 1));
+        $name = 'img_'.uniqid().'.jpg';
+        Storage::disk('public')->makeDirectory('posts');
+        $dest = Storage::disk('public')->path('posts/'.$name);
+
+        if (function_exists('imagecreatefromstring') && ($src = @imagecreatefromstring($raw))) {
+            $w = imagesx($src); $h = imagesy($src);
+            $scale = min(1, $maxW / $w, $maxH / $h);
+            if ($scale < 1) {
+                $nw = (int) round($w * $scale); $nh = (int) round($h * $scale);
+                $dst = imagecreatetruecolor($nw, $nh);
+                imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+                imagedestroy($src); $src = $dst;
+            }
+            imagejpeg($src, $dest, 82);
+            imagedestroy($src);
+        } else {
+            // fallback sem GD: o Croppie já entregou no tamanho/qualidade alvo
+            Storage::disk('public')->put('posts/'.$name, $raw);
+        }
+        return $name;
+    }
+
     private function validated(Request $req): array
     {
         $req->validate([
-            'titulo'            => ['required','string','max:160'],
-            'categoria'         => ['nullable','string','max:60'],
-            'resumo'            => ['nullable','string','max:255'],
-            'conteudo'          => ['nullable','string'],
-            'capa'              => ['nullable','image','mimes:jpg,jpeg,png,webp','max:5120'],
-            'imagem_principal'  => ['nullable','image','mimes:jpg,jpeg,png,webp','max:5120'],
-            'imagem_secundaria' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:5120'],
+            'titulo'    => ['required','string','max:160'],
+            'categoria' => ['nullable','string','max:60'],
+            'resumo'    => ['nullable','string','max:255'],
+            'conteudo'  => ['nullable','string'],
         ]);
         return [
             'titulo'    => $req->titulo,
