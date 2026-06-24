@@ -260,7 +260,9 @@ footer .fbrand b{font-family:var(--serif);font-size:1.5rem;color:#fff}
   .menu.open{display:flex;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;background:var(--branco);padding:14px;border-bottom:1px solid var(--line);gap:2px;max-height:calc(100vh - 64px);overflow:auto;box-shadow:var(--shadow)}
   .menu.open>li>a,.menu.open>li>span{padding:.85rem .6rem;font-size:1.02rem}
   .menu.open .caret{margin-left:auto}
-  .menu.open .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;background:var(--marfim-2);margin:4px 0;min-width:0;border-radius:10px}
+  .menu.open .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;background:var(--marfim-2);margin:0;min-width:0;border-radius:10px;display:none}
+  .menu.open li.sub-open>.dropdown{display:block;margin:4px 0 8px}
+  .menu.open li.sub-open>span .caret{transform:rotate(-135deg)}
   .menu.open .m-only{display:block;margin-top:6px}
   .hero{min-height:0;padding:48px 0}
   .hero .wrap{grid-template-columns:1fr;text-align:center;gap:30px}
