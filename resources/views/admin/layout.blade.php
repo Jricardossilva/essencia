@@ -4,7 +4,7 @@
 <title>@yield('t','Painel') · Essência</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/app.css') }}"></head>
+<link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}"></head>
 <body><div class="admin-wrap">
   <aside class="admin-side">
     <div class="brand"><img src="{{ asset('assets/mark.png') }}" width="36" height="36" alt=""><b>Essência</b></div>
