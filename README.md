@@ -178,7 +178,7 @@ roda as migrações com seed e cria o `storage:link`).
 
 - 🌐 Site: **http://localhost:8080**
 - 🔐 Painel: **http://localhost:8080/login**
-- 🗄️ MySQL exposto na porta **3307** (para não conflitar com um MySQL local na 3306).
+- 🗄️ MySQL exposto na porta **3306**
 
 ### Opção B — Instalação manual
 
@@ -212,11 +212,11 @@ DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
 DB_DATABASE=essencia
-DB_USERNAME=essencia
-DB_PASSWORD=secret
+DB_USERNAME=root
+DB_PASSWORD=root
 
 # Número usado nos botões/widget de WhatsApp (formato internacional, só dígitos)
-WHATSAPP_NUMBER=5583988874271
+WHATSAPP_NUMBER=5583999999999
 ```
 
 ---
@@ -228,8 +228,8 @@ O seeder cria o usuário administrador e o conteúdo inicial (depoimentos e arti
 **Credenciais padrão (troque após o primeiro acesso):**
 
 ```
-E-mail: admin@essencia.com.br
-Senha:  essencia2026
+E-mail: teste@essencia.com.br
+Senha:  teste
 ```
 
 Principais tabelas: `users`, `posts`, `testimonials`, `leads`.
@@ -263,13 +263,13 @@ apresentado na hora, com CTA para o WhatsApp. Cada e-mail só pode responder uma
 
 ---
 
-## 🌐 Deploy (Hostinger)
+## 🌐 Deploy
 
 Hospedagem compartilhada (hPanel), Laravel servido nativamente (sem Docker em produção):
 
 1. **Subdomínio** com *Document Root* apontando para a pasta **`/public`** do projeto.
 2. **PHP 8.3** selecionado no hPanel.
-3. **Banco MySQL** criado no hPanel (nome/usuário com prefixo da conta).
+3. **Banco MySQL** criado no hPanel.
 4. Clone via SSH e configuração:
    ```bash
    git clone git@github.com:Jricardossilva/essencia.git
